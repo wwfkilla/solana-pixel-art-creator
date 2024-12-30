@@ -1,0 +1,33 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+#colorPicker {
+    margin-bottom: 10px;
+}
+
+#pixelCanvas {
+    border: 1px solid black;
+    background-color: #ffffff;
+    cursor: crosshair;
+}
+
+#saveBtn {
+    margin-top: 10px;
+}
+
+#controls {
+    margin-bottom: 10px;
+}
+
+#controls button {
+    margin: 0 5px;
+}
+
+#brightness {
+    width: 100px;
+    vertical-align: middle;
+}
