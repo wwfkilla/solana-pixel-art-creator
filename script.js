@@ -117,12 +117,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Clear canvas (unchanged)
+    // Default background color
+    const defaultBgColor = '#ffffff'; // Set your default background color here
+
+
+    // Clear canvas with confirmation
     clearBtn.addEventListener('click', function() {
+    if (confirm('Are you sure you want to clear the canvas and reset the background color?')) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.backgroundColor = defaultBgColor;
+        document.getElementById('bgColorSelect').value = defaultBgColor;
         history = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
         historyIndex = 0;
+    }
     });
+
 
     // Save button functionality (unchanged)
     saveBtn.addEventListener('click', function() {
