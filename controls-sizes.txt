@@ -1,0 +1,22 @@
+Dimensions of Controls
+
+Label: Pixel Color:
+Input: input[type="color"]
+Dimensions: 150px (width) x 30px (height)
+
+Label: Brightness:
+Input: input[type="range"]
+Dimensions: 150px (width) x 30px (height)
+
+Label: Background Color:
+Input: input[type="color"]
+Dimensions: 150px (width) x 30px (height)
+
+Buttons (Undo, Redo, Clear)
+Dimensions: 50px (width) x 50px (height)
+
+Canvas
+Dimensions: 320px (width) x 320px (height)
+
+Save Button
+Dimensions: 100px (width) x 30px (height)

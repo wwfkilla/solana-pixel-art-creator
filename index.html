@@ -7,16 +7,29 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="colorPicker">
-        <input type="color" id="colorSelect" value="#000000">
-        <input type="range" id="brightness" min="0" max="2" step="0.1" value="1">
+    <div id="container">
+        <div id="toolbox">
+            <div id="colorPicker">
+                <label for="colorSelect">Pixel Color:</label>
+                <input type="color" id="colorSelect" value="#000000">
+            </div>
+            <div id="brightnessControl">
+                <label for="brightness">Brightness:</label>
+                <input type="range" id="brightness" min="0" max="2" step="0.1" value="1">
+            </div>
+            <div id="colorPicker">
+                <label for="bgColorSelect">Background Color:</label>
+                <input type="color" id="bgColorSelect" value="#ffffff">
+            </div>
+            
+            <div id="controls">
+                <button id="undoBtn">Undo</button>
+                <button id="redoBtn">Redo</button>
+                <button id="clearBtn">Clear</button>
+            </div>
+        </div>
+        <canvas id="pixelCanvas" width="320" height="320"></canvas>
     </div>
-    <div id="controls">
-        <button id="undoBtn">Undo</button>
-        <button id="redoBtn">Redo</button>
-        <button id="clearBtn">Clear</button>
-    </div>
-    <canvas id="pixelCanvas" width="320" height="320"></canvas>
     <button id="saveBtn">Save Image</button>
     <script src="script.js"></script>
 </body>

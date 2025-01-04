@@ -35,6 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const color = hexToRgb(hex);
         return `rgb(${Math.round(color.r * brightness)}, ${Math.round(color.g * brightness)}, ${Math.round(color.b * brightness)})`;
     }
+   
+    // Change background color
+    document.getElementById('bgColorSelect').addEventListener('input', function(event) {
+        document.getElementById('pixelCanvas').style.backgroundColor = event.target.value;
+    });
 
     // Convert hex to RGB (unchanged)
     function hexToRgb(hex) {
