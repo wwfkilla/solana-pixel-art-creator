@@ -12,7 +12,7 @@ body {
     align-items: flex-start;
 }
 
-#toolbox {
+#toolbox, #imageControls {
     display: flex;
     flex-direction: column;
     margin-right: 20px;
@@ -32,7 +32,7 @@ body {
     margin-top: 10px;
 }
 
-#saveBtn {
+#saveBtn, #imageUpload, #removeImageBtn {
     margin-top: 10px;
     margin-left: 20px;
 }
@@ -55,4 +55,10 @@ body {
     vertical-align: middle;
     margin-bottom: 10px;
     margin-top: 10px;
+}
+
+#imageControls label {
+    display: block;
+    margin-top: 10px;
+    margin-left: 20px;
 }

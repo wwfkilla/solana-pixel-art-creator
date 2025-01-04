@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const defaultBgColor = '#ffffff'; // Set your default background color here
 
 
-    // Clear canvas with confirmation
-    clearBtn.addEventListener('click', function() {
+// Clear canvas with confirmation
+clearBtn.addEventListener('click', function() {
     if (confirm('Are you sure you want to clear the canvas and reset the background color?')) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.backgroundColor = defaultBgColor;
@@ -130,15 +130,31 @@ document.addEventListener('DOMContentLoaded', function() {
         history = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
         historyIndex = 0;
     }
-    });
+});
 
+// Save button functionality (modified)
+saveBtn.addEventListener('click', function() {
+    const pixelCanvas = document.getElementById('pixelCanvas');
+    const bgColor = document.getElementById('bgColorSelect').value;
 
-    // Save button functionality (unchanged)
-    saveBtn.addEventListener('click', function() {
-        const dataURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = 'pixel_art.png';
-        link.href = dataURL;
-        link.click();
-    });
+    // Create a new canvas element
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = pixelCanvas.width;
+    tempCanvas.height = pixelCanvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Draw the background color
+    tempCtx.fillStyle = bgColor;
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Draw the pixel art on top of the background
+    tempCtx.drawImage(pixelCanvas, 0, 0);
+
+    // Save the image
+    const link = document.createElement('a');
+    link.download = 'pixel_art.png';
+    link.href = tempCanvas.toDataURL();
+    link.click();
+});
+
 });
