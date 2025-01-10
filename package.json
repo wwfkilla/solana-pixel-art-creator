@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@metaplex-foundation/js": "^0.20.1"
+  }
+}
