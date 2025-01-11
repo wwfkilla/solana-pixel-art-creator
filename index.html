@@ -5,27 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Creator</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Added Font Awesome -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"> <!-- Added Tippy.js for tooltips -->
 </head>
 <body>
+
+    <header>
+        <h1>Pixel Art Creator</h1>
+    </header>
+
     <div id="container">
         <div id="toolbox">
             <div id="colorPicker">
                 <label for="colorSelect">Pixel Color:</label>
-                <input type="color" id="colorSelect" value="#000000">
+                <input type="color" id="colorSelect" title="Select Color" value="#000000">
             </div>
             <div id="brightnessControl">
                 <label for="brightness">Brightness:</label>
-                <input type="range" id="brightness" min="0" max="2" step="0.1" value="1">
+                <input type="range" id="brightness" min="0" max="2" step="0.1" value="1" title="Adjust Brightness">
             </div>
             <div id="colorPicker">
                 <label for="bgColorSelect">Background Color:</label>
-                <input type="color" id="bgColorSelect" value="#ffffff">
+                <input type="color" id="bgColorSelect" value="#ffffff" title="Change Background Color">
             </div>
             
             <div id="controls">
-                <button id="undoBtn">Undo</button>
-                <button id="redoBtn">Redo</button>
-                <button id="clearBtn">Clear</button>
+                <button id="undoBtn" title="Undo last action"><i class="fas fa-undo"></i> Undo</button> <!-- Added icon -->
+                <button id="redoBtn" title="Redo last action"><i class="fas fa-redo"></i> Redo</button> <!-- Added icon -->
+                <button id="clearBtn" title="Clear the canvas"><i class="fas fa-trash"></i> Clear</button> <!-- Added icon -->
             </div>
         </div>
         <canvas id="pixelCanvas" width="320" height="320"></canvas>
@@ -33,9 +41,17 @@
     </div>
     <div id="imageControls">
         <div>
-            <button id="saveBtn">Save Image</button>
+            <button id="saveBtn" title="Save your artwork"><i class="fas fa-save"></i> Save</button> <!-- Added icon -->
+            <button id="connectWalletBtn" title="Connect your Solana wallet">Connect Wallet</button>
+            <button id="mintBtn" title="Mint your artwork on chain">Mint Artwork</button>
         </div>
     </div>
+
+    <footer>
+        <p>&copy; 2025 Created by <a href="https://x.com/wwfkilla" target="_blank" rel="noopener noreferrer" class="footer-link">wwfkilla</a></p> <!-- Added link with class -->
+    </footer>
+
+    <script src="https://unpkg.com/tippy.js@6"></script> <!-- Added Tippy.js for tooltips -->
     <script src="script.js"></script>
 </body>
 </html>

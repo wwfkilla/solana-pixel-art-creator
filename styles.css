@@ -1,17 +1,37 @@
 body {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    font-family: Arial, sans-serif;
-    margin-top: 40px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh; /* Added to ensure body takes full height of viewport */
+    background: linear-gradient(135deg, #121212, #1e1e1e); /* Added gradient background */
+    color: #e0e0e0;
+}
+
+header, footer {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+header h1, footer p {
+    margin: 0;
 }
 
 #container {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+    margin: 20px;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
-
 #toolbox, #imageControls {
     display: flex;
     flex-direction: column;
@@ -61,4 +81,80 @@ body {
     display: block;
     margin-top: 10px;
     margin-left: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #e0e0e0;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #555, #777); /* Updated hover background */
+    transform: scale(1.05);
+}
+
+button:active {
+    background-color: #777;
+}
+
+button i {
+    margin-right: 8px; /* Added margin for icons */
+}
+
+#colorSelect, #brightness {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #333;
+    color: #e0e0e0;
+    margin-bottom: 10px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 12px; /* Added custom scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+    background: #1e1e1e; /* Added custom scrollbar track color */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333; /* Added custom scrollbar thumb color */
+    border-radius: 6px; /* Added custom scrollbar thumb border radius */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Added custom scrollbar thumb hover color */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #container {
+        flex-direction: column; /* Adjusted flex direction for smaller screens */
+        align-items: center;
+    }
+    #toolbox, #imageControls {
+        margin-right: 0; /* Adjusted margin for smaller screens */
+        margin-bottom: 20px;
+    }
+}
+
+/* Footer Link */
+.footer-link {
+    color: #3498db; /* Link color */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: #1abc9c; /* Hover color */
 }
