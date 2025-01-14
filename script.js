@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const redoBtn = document.getElementById('redoBtn');
     const clearBtn = document.getElementById('clearBtn');
     const brightness = document.getElementById('brightness');
+    const maxZoom = 4;
+    const minZoom = 0.5;
+    const zoomStep = 0.5;
 
     let pixelSize = 10; // Each pixel is 10x10
     let gridSize = 32; // 32x32 grid
@@ -16,11 +19,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let historyIndex = -1; // current index in history
     let isDrawing = false;
     let isErasing = false;
+    let zoomLevel = 1;
+    let isSelectionMode = false;
+    let selectedPixels = [];
+    let selectionStart = null;
+    let selectionEnd = null;
+    let isDraggingSelection = false;
+
 
     // Initialize canvas
     canvas.width = gridSize * pixelSize;
     canvas.height = gridSize * pixelSize;
     ctx.imageSmoothingEnabled = false;
+
 
     // Function to draw or erase a pixel
     function updatePixel(x, y) {
@@ -121,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Default background color
     const defaultBgColor = '#ffffff'; // Set your default background color here
-
+    
 
 // Clear canvas with confirmation
 clearBtn.addEventListener('click', function() {
@@ -158,5 +169,74 @@ saveBtn.addEventListener('click', function() {
     link.href = tempCanvas.toDataURL();
     link.click();
 });
+
+
+
+// Get zoom control elements
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const zoomLevelDisplay = document.getElementById('zoomLevel');
+
+// Apply zoom transform to canvas
+function updateZoom() {
+    canvas.style.transform = `scale(${zoomLevel})`;
+    canvas.style.transformOrigin = 'top left';
+    zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+}
+
+// Zoom in button handler
+zoomInBtn.addEventListener('click', () => {
+    if (zoomLevel < maxZoom) {
+        zoomLevel += zoomStep;
+        updateZoom();
+    }
+});
+
+// Zoom out button handler 
+zoomOutBtn.addEventListener('click', () => {
+    if (zoomLevel > minZoom) {
+        zoomLevel -= zoomStep;
+        updateZoom();
+    }
+});
+
+// Update mouse position calculation for zoomed canvas
+function updatePixelFromEvent(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
+    const y = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
+    
+    if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+        if (!history[historyIndex + 1]) {
+            history = history.slice(0, historyIndex + 1);
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            historyIndex++;
+        }
+        updatePixel(x, y);
+    }
+}
+
+// Adding function to hide overflow when zoomed in
+function updateZoom() {
+    canvas.style.transform = `scale(${zoomLevel})`;
+    canvas.style.transformOrigin = 'top left';
+    zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+    
+    // Toggle scrollbars
+    const container = document.querySelector('.canvas-container');
+    if (zoomLevel === 1) {
+        container.classList.add('no-scroll');
+    } else {
+        container.classList.remove('no-scroll');
+    }
+}
+
+// Add near other UI controls
+const gridToggle = document.getElementById('gridToggle');
+gridToggle.addEventListener('click', () => {
+    canvas.classList.toggle('grid-overlay');
+});
+
+
 
 });

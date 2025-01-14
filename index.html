@@ -17,27 +17,51 @@
 
     <div id="container">
         <div id="toolbox">
+            <div id="toolInstructions">
+                Use mouse left to draw pixels.
+                Use mouse right to erase pixels
+            </div>
+            <div id="bgcolorPicker">
+                <label for="bgColorSelect">Background Color:</label>
+                <input type="color" id="bgColorSelect" value="#ffffff" title="Change Background Color">
+            </div>
             <div id="colorPicker">
                 <label for="colorSelect">Pixel Color:</label>
                 <input type="color" id="colorSelect" title="Select Color" value="#000000">
             </div>
+
             <div id="brightnessControl">
-                <label for="brightness">Brightness:</label>
-                <input type="range" id="brightness" min="0" max="2" step="0.1" value="1" title="Adjust Brightness">
+                <div id="brightnessControl">
+                    <label for="brightness">Brightness:</label>
+                    <input type="range" id="brightness" min="0" max="2" step="0.1" value="1" title="Adjust Brightness">
+                </div>
             </div>
-            <div id="colorPicker">
-                <label for="bgColorSelect">Background Color:</label>
-                <input type="color" id="bgColorSelect" value="#ffffff" title="Change Background Color">
+            <div id="zoomControl">
+                <label for="zoom">Zoom:</label>
+                <button id="zoomInBtn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+                <button id="zoomOutBtn" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+                <span id="zoomLevel">100%</span>
             </div>
+            <div id="zoomInstructions">
+                Use +/- buttons to zoom in/out for detailed work.
+                Use mouse wheel to move up/down.
+                Use Shift+mouse wheel to move left/right.
+            </div>
+ 
             
             <div id="controls">
                 <button id="undoBtn" title="Undo last action"><i class="fas fa-undo"></i> Undo</button> <!-- Added icon -->
                 <button id="redoBtn" title="Redo last action"><i class="fas fa-redo"></i> Redo</button> <!-- Added icon -->
+            </div>
+            <div id="toolControls">
+                <button id="gridToggle" title="Toggle the grid on and off"><i class="fas fa-trash"></i> Toggle Grid</button> <!-- Added icon -->
                 <button id="clearBtn" title="Clear the canvas"><i class="fas fa-trash"></i> Clear</button> <!-- Added icon -->
             </div>
         </div>
-        <canvas id="pixelCanvas" width="320" height="320"></canvas>
-        <canvas id="imageCanvas" width="320" height="320" style="position: absolute; top: 0; left: 0;"></canvas>
+        <div class="canvas-container">
+            <canvas id="pixelCanvas" width="320" height="320"></canvas>
+            <canvas id="imageCanvas" width="320" height="320" style="position: absolute; top: 0; left: 0;"></canvas>
+        </div>
     </div>
     <div id="imageControls">
         <div>
@@ -46,6 +70,8 @@
             <button id="mintBtn" title="Mint your artwork on chain">Mint Artwork</button>
         </div>
     </div>
+
+
 
     <footer>
         <p>&copy; 2025 Created by <a href="https://x.com/wwfkilla" target="_blank" rel="noopener noreferrer" class="footer-link">wwfkilla</a></p> <!-- Added link with class -->

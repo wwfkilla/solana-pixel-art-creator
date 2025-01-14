@@ -41,7 +41,7 @@ header h1, footer p {
     font-size: 14px;
 }
 
-#colorPicker, #brightnessControl {
+#colorPicker, #bgcolorPicker, #brightnessControl {
     margin-bottom: 10px;
 }
 
@@ -52,14 +52,15 @@ header h1, footer p {
     margin-top: 10px;
 }
 
-#saveBtn, #imageUpload, #removeImageBtn {
+#saveBtn {
     margin-top: 10px;
     margin-left: 20px;
 }
 
 #controls {
     margin-bottom: 10px;
-    margin-top: 10px;
+    margin-top: 20px;
+    align-items: flex-start;
     
 
 }
@@ -67,14 +68,40 @@ header h1, footer p {
 #controls button {
     margin: 0 5px;
     margin-bottom: 10px;
+    align-items: flex-start;
     
 }
 
 #brightness {
-    width: 100px;
+    width: 200px;
     vertical-align: middle;
     margin-bottom: 10px;
     margin-top: 10px;
+}
+
+datalist {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    margin-top: 5px;
+}
+
+datalist option {
+    position: relative;
+    font-size: 10px;
+    color: #666;
+    padding-top: 5px;
+}
+
+datalist option::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -5px;
+    width: 2px;
+    height: 5px;
+    background: #666;
 }
 
 #imageControls label {
@@ -93,6 +120,7 @@ button {
     color: #e0e0e0;
     transition: background-color 0.3s, transform 0.3s;
     margin-bottom: 10px;
+    margin-left: 0;
 }
 
 button:hover {
@@ -108,6 +136,7 @@ button i {
     margin-right: 8px; /* Added margin for icons */
 }
 
+/* Custom Scrollbars 
 #colorSelect, #brightness {
     padding: 10px;
     font-size: 16px;
@@ -116,7 +145,7 @@ button i {
     background-color: #333;
     color: #e0e0e0;
     margin-bottom: 10px;
-}
+} */
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
@@ -157,4 +186,93 @@ button i {
 
 .footer-link:hover {
     color: #1abc9c; /* Hover color */
+}
+
+#zoomControl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0px;
+}
+
+#zoomControl button {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+#zoomLevel {
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Add container for canvas with overflow handling */
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+    width: 333px;
+    height: 333px;
+    margin: 10px;
+    border: none; /* 1px solid #333 */
+}
+/* Add grid overlay */
+.grid-overlay {
+    background-image: 
+        repeating-linear-gradient(#ccc 0 1px, transparent 1px 100%),
+        repeating-linear-gradient(90deg, #ccc 0 1px, transparent 1px 100%);
+    background-size: 10px 10px; /* Adjust based on your pixel size */
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+#zoomInstructions {
+    font-size: 12px;
+    color: #666;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    text-align: left;
+    font-style: italic;
+    white-space: pre-line;
+    padding-left: 10px;
+}
+
+#toolControls {
+    display: flex;
+    flex-direction: row; 
+    gap: 10px;
+    margin: 5px 0;
+    align-items: flex-start; 
+}
+
+#toolControls button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #e0e0e0;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-bottom: 10px;
+}
+
+#toolControls button:hover {
+    background: linear-gradient(135deg, #555, #777); /* Updated hover background */
+    transform: scale(1.05);
+}
+
+#toolControls button:active {
+    background-color: #777;
+}
+
+#toolInstructions {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 15px;
+    text-align: left;
+    font-style: italic;
+    white-space: pre-line;
 }
