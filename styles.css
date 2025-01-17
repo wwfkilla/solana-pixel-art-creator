@@ -41,8 +41,12 @@ header h1, footer p {
     font-size: 14px;
 }
 
-#colorPicker, #bgcolorPicker, #brightnessControl {
+#colorPicker, #bgcolorPicker, #brightnessControl #zoomControl {
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
 }
 
 #pixelCanvas {
@@ -52,10 +56,7 @@ header h1, footer p {
     margin-top: 10px;
 }
 
-#saveBtn {
-    margin-top: 10px;
-    margin-left: 20px;
-}
+
 
 #controls {
     margin-bottom: 10px;
@@ -198,11 +199,15 @@ button i {
 #zoomControl button {
     padding: 5px 10px;
     font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #zoomLevel {
     min-width: 60px;
     text-align: center;
+    margin-left: 5px;
 }
 
 /* Add container for canvas with overflow handling */
@@ -219,8 +224,8 @@ button i {
 /* Add grid overlay */
 .grid-overlay {
     background-image: 
-        repeating-linear-gradient(#ccc 0 1px, transparent 1px 100%),
-        repeating-linear-gradient(90deg, #ccc 0 1px, transparent 1px 100%);
+    repeating-linear-gradient(rgba(204,204,204,0.5) 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(90deg, rgba(204,204,204,0.5) 0 1px, transparent 1px 100%);
     background-size: 10px 10px; /* Adjust based on your pixel size */
 }
 
@@ -275,4 +280,104 @@ button i {
     text-align: left;
     font-style: italic;
     white-space: pre-line;
+}
+
+#preview-container {
+    position: absolute;
+    right: 350px;
+    top: 155px;
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    height: fit-content;
+}
+
+#previewCanvas {
+    width: 200px;
+    height: 200px;
+    image-rendering: pixelated;
+    background-color: white;
+    border: 1px solid #333;
+}
+
+.preview-label {
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+#line-tools {
+    display: flex;
+    position: absolute;
+    left: 350px;
+    top: 155px;
+    flex-direction: column;
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-right: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    height: fit-content;
+
+}
+
+.tool-btn {
+    padding: 8px 12px;
+    background: #333;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    text-align: left;        
+    display: flex;            
+    align-items: center;      
+    gap: 8px; 
+
+}
+
+.tool-btn:hover {
+    background: #444;
+}
+
+.tool-instructions {
+    font-size: 12px;
+    text-align: center;
+    color: #666;
+    margin-top: -10px;
+    margin-bottom: 5px;
+    text-align: left;
+    font-style: italic;
+    white-space: pre-line;
+}
+
+.preview-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.preview-buttons .tool-btn {
+    width: 100%;
+    padding: 8px 12px;
+    background: #333;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.preview-buttons .tool-btn i {
+    width: 16px;
 }

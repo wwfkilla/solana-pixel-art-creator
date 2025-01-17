@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedPixels = [];
     let selectionStart = null;
     let selectionEnd = null;
-    let isDraggingSelection = false;
+    let isDrawingLine = false;
+    let lineStartX = null;
+    let lineStartY = null;
+
 
 
     // Initialize canvas
@@ -41,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillStyle = adjustBrightness(colorSelect.value, brightness.value);
             ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         }
+        updatePreview();
     }
 
     // Adjust color brightness (unchanged)
@@ -52,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Change background color
     document.getElementById('bgColorSelect').addEventListener('input', function(event) {
         document.getElementById('pixelCanvas').style.backgroundColor = event.target.value;
+        document.getElementById('previewCanvas').style.backgroundColor = event.target.value;
+
     });
 
     // Convert hex to RGB (unchanged)
@@ -139,9 +145,16 @@ clearBtn.addEventListener('click', function() {
     if (confirm('Are you sure you want to clear the canvas and reset the background color?')) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.backgroundColor = defaultBgColor;
+        document.getElementById('previewCanvas').style.backgroundColor = '#ffffff';
         document.getElementById('bgColorSelect').value = defaultBgColor;
         history = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
         historyIndex = 0;
+    
+    // Update preview
+    updatePreview();
+    
+    // Save to history
+    saveToHistory();
     }
 });
 
@@ -190,6 +203,7 @@ zoomInBtn.addEventListener('click', () => {
         zoomLevel += zoomStep;
         updateZoom();
     }
+    updatePreview();
 });
 
 // Zoom out button handler 
@@ -198,6 +212,7 @@ zoomOutBtn.addEventListener('click', () => {
         zoomLevel -= zoomStep;
         updateZoom();
     }
+    updatePreview();
 });
 
 // Update mouse position calculation for zoomed canvas
@@ -237,6 +252,93 @@ gridToggle.addEventListener('click', () => {
     canvas.classList.toggle('grid-overlay');
 });
 
+// Add preview window
+const previewCanvas = document.getElementById('previewCanvas');
+const previewCtx = previewCanvas.getContext('2d');
 
+function updatePreview() {
+    // Clear preview
+    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    
+    // Draw main canvas content to preview
+    previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
+}
+
+// Export as svg
+function exportAsSVG() {
+    // Create SVG content
+    let svgContent = `<svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
+    
+    // Add background
+    svgContent += `<rect width="100%" height="100%" fill="${canvas.style.backgroundColor || '#ffffff'}"/>`;
+    
+    // Get pixel data
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Convert pixels to SVG rects
+    for (let y = 0; y < canvas.height; y += pixelSize) {
+        for (let x = 0; x < canvas.width; x += pixelSize) {
+            const i = (y * canvas.width + x) * 4;
+            if (data[i + 3] > 0) { // If pixel is not transparent
+                const color = `rgb(${data[i]}, ${data[i + 1]}, ${data[i + 2]})`;
+                svgContent += `<rect x="${x}" y="${y}" width="${pixelSize}" height="${pixelSize}" fill="${color}"/>`;
+            }
+        }
+    }
+    
+    svgContent += '</svg>';
+    
+    // Create download link
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'pixel-art.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportSvgBtn').addEventListener('click', exportAsSVG);
+
+// Line drawing:
+
+// New functions for line drawing
+function redrawLine(event) {
+    const rect = canvas.getBoundingClientRect();
+    let endX = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
+    let endY = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
+
+    // Clear the canvas and redraw the last state before drawing the line
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(history[historyIndex], 0, 0);
+
+    if (event.shiftKey) { // If Shift is pressed, draw a straight line
+        if (Math.abs(lineStartX - endX) > Math.abs(lineStartY - endY)) {
+            endY = lineStartY; // Horizontal line
+        } else {
+            endX = lineStartX; // Vertical line
+        }
+    }
+
+    // Draw line
+    ctx.beginPath();
+    ctx.moveTo(lineStartX * pixelSize + pixelSize / 2, lineStartY * pixelSize + pixelSize / 2);
+    ctx.lineTo(endX * pixelSize + pixelSize / 2, endY * pixelSize + pixelSize / 2);
+    ctx.strokeStyle = adjustBrightness(colorSelect.value, brightness.value);
+    ctx.lineWidth = pixelSize;
+    ctx.lineCap = "round";
+    ctx.stroke();
+}
+
+function finishLine(event) {
+    // Save the current state with the line drawn
+    history = history.slice(0, historyIndex + 1);
+    history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    historyIndex++;
+    updatePreview();
+}
 
 });
