@@ -229,6 +229,16 @@ button i {
     background-size: 10px 10px; /* Adjust based on your pixel size */
 }
 
+.grid-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Prevent interference with canvas clicks */
+}
+
 .no-scroll {
     overflow: hidden;
 }

@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.width = gridSize * pixelSize;
     canvas.height = gridSize * pixelSize;
     ctx.imageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
 
 
     // Function to draw or erase a pixel
@@ -42,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.clearRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         } else {
             ctx.fillStyle = adjustBrightness(colorSelect.value, brightness.value);
+            x = Math.floor(x);
+            y = Math.floor(y);
             ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         }
         updatePreview();
@@ -57,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('bgColorSelect').addEventListener('input', function(event) {
         document.getElementById('pixelCanvas').style.backgroundColor = event.target.value;
         document.getElementById('previewCanvas').style.backgroundColor = event.target.value;
-
     });
 
     // Convert hex to RGB (unchanged)
@@ -162,6 +166,8 @@ clearBtn.addEventListener('click', function() {
 saveBtn.addEventListener('click', function() {
     const pixelCanvas = document.getElementById('pixelCanvas');
     const bgColor = document.getElementById('bgColorSelect').value;
+    let wasGridOn = canvas.classList.contains('grid-overlay');
+    canvas.classList.remove('grid-overlay');
 
     // Create a new canvas element
     const tempCanvas = document.createElement('canvas');
@@ -181,6 +187,9 @@ saveBtn.addEventListener('click', function() {
     link.download = 'pixel_art.png';
     link.href = tempCanvas.toDataURL();
     link.click();
+    if (wasGridOn) {
+        canvas.classList.add('grid-overlay');
+    }
 });
 
 
@@ -246,9 +255,8 @@ function updateZoom() {
     }
 }
 
-// Add near other UI controls
-const gridToggle = document.getElementById('gridToggle');
-gridToggle.addEventListener('click', () => {
+// Grid toggle
+document.getElementById('gridToggle').addEventListener('click', function() {
     canvas.classList.toggle('grid-overlay');
 });
 
@@ -266,30 +274,38 @@ function updatePreview() {
 
 // Export as svg
 function exportAsSVG() {
-    // Create SVG content
-    let svgContent = `<svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
-    
+    let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
+
     // Add background
-    svgContent += `<rect width="100%" height="100%" fill="${canvas.style.backgroundColor || '#ffffff'}"/>`;
-    
-    // Get pixel data
+    svgContent += `<rect x="0" y="0" width="${canvas.width}" height="${canvas.height}" fill="${canvas.style.backgroundColor || '#ffffff'}"/>`;
+
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
-    
-    // Convert pixels to SVG rects
+
+    // Group pixels by color
+    const colorPaths = {};
     for (let y = 0; y < canvas.height; y += pixelSize) {
         for (let x = 0; x < canvas.width; x += pixelSize) {
             const i = (y * canvas.width + x) * 4;
             if (data[i + 3] > 0) { // If pixel is not transparent
                 const color = `rgb(${data[i]}, ${data[i + 1]}, ${data[i + 2]})`;
-                svgContent += `<rect x="${x}" y="${y}" width="${pixelSize}" height="${pixelSize}" fill="${color}"/>`;
+                if (!colorPaths[color]) {
+                    colorPaths[color] = [];
+                }
+                colorPaths[color].push([Math.floor(x), Math.floor(y)]);
             }
         }
     }
-    
+
+    // Convert grouped pixels into paths
+    for (let color in colorPaths) {
+        let pathData = colorPaths[color].map(([x, y]) => `M${x} ${y}h${pixelSize}v${pixelSize}h-${pixelSize}z`).join(' ');
+        svgContent += `<path d="${pathData}" fill="${color}" stroke="none"/>`;
+    }
+
     svgContent += '</svg>';
-    
-    // Create download link
+
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
