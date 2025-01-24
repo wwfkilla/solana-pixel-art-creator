@@ -109,6 +109,13 @@ datalist option::before {
     display: block;
     margin-top: 10px;
     margin-left: 20px;
+
+}
+
+#connectWalletBtn, #mintBtn {
+    opacity: 0.5; /* Makes buttons look faded */
+    cursor: not-allowed; /* Changes cursor to indicate not clickable */
+    pointer-events: none; /* Prevents click interactions */
 }
 
 button {
@@ -216,10 +223,32 @@ button i {
     justify-content: center;
     align-items: center;
     overflow: auto;
-    width: 333px;
-    height: 333px;
+    width: 333px; /* Adjust based on your canvas size and zoom level */
+    height: 333px; /* Adjust based on your canvas size and zoom level */
+    position: relative; /* This is crucial for absolute positioning of child elements */
     margin: 10px;
     border: none; /* 1px solid #333 */
+    margin: 0;
+    padding: 0;
+}
+
+#pixelCanvas, #tracingCanvas {
+    position: absolute; /* Both canvases should be absolutely positioned within their container */
+    top: 0;
+    left: 0;
+    border: none;
+    margin: 0;
+}
+
+#tracingCanvas {
+    pointer-events: none; /* So that clicks go through to the drawing canvas */
+    z-index: 1; /* Ensure the tracing canvas is layered above the drawing canvas */
+    visibility: visible;
+}
+
+#pixelCanvas {
+    z-index: 0; /* Below the tracing canvas */
+    visibility: visible;
 }
 /* Add grid overlay */
 .grid-overlay {
@@ -295,12 +324,13 @@ button i {
 #preview-container {
     position: absolute;
     right: 350px;
-    top: 155px;
+    top: 150px;
     background: #1e1e1e;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     height: fit-content;
+    margin-left: 20px;
 }
 
 #previewCanvas {
@@ -323,7 +353,7 @@ button i {
     display: flex;
     position: absolute;
     left: 350px;
-    top: 155px;
+    top: 150px;
     flex-direction: column;
     background: #1e1e1e;
     padding: 15px;
@@ -374,14 +404,6 @@ button i {
 }
 
 .preview-buttons .tool-btn {
-    width: 100%;
-    padding: 8px 12px;
-    background: #333;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 8px;

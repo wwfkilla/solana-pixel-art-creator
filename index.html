@@ -16,13 +16,22 @@
     </header>
 
     <div id="line-tools">
-            <button id="saveBtn" class="tool-btn" title="Export as PNG">
+        <button id="saveBtn" class="tool-btn" title="Export as PNG">
             <i class="fas fa-save"></i> Export as PNG
         </button> 
         <button id="exportSvgBtn" class="tool-btn" title="Export as SVG">
             <i class="fas fa-file-export"></i> Export SVG
         </button>
+        <button id="importImageBtn" class="tool-btn" title="Import for Tracing">
+            <i class="fas fa-file-import"></i> Import for Tracing
+        </button>
+        <button id="clearTracingBtn" class="tool-btn" title="Remove the tracing image">
+            <i class="fas fa-trash"></i> Clear Tracing Image
+        </button>
+        <input type="file" id="imageLoader" name="imageLoader" accept="image/*">
+        
     </div>
+  
 
     <div id="container">
         <div id="toolbox">
@@ -69,11 +78,15 @@
         </div>
         <div class="canvas-container">
             <canvas id="pixelCanvas" width="320" height="320"></canvas>
-            <canvas id="imageCanvas" width="320" height="320" style="position: absolute; top: 0; left: 0;"></canvas>
+            <canvas id="tracingCanvas" width="320" height="320" style="position: absolute; top: 0; left: 0;"></canvas>
+           
         </div>
     </div>
     <div id="imageControls">
-
+        <div>
+            <button id="connectWalletBtn" title="Connect your Solana wallet">Connect Wallet</button>
+            <button id="mintBtn" title="Mint your artwork on chain">Mint Artwork</button>
+        </div>
     </div>
     <div id="preview-container">
         <canvas id="previewCanvas"></canvas>

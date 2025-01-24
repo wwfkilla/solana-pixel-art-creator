@@ -1,8 +1,8 @@
-
-
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('pixelCanvas');
     const ctx = canvas.getContext('2d');
+    const tracingCanvas = document.getElementById('tracingCanvas');
+    const tracingCtx = tracingCanvas.getContext('2d');
     const colorSelect = document.getElementById('colorSelect');
     const saveBtn = document.getElementById('saveBtn');
     const undoBtn = document.getElementById('undoBtn');
@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxZoom = 4;
     const minZoom = 0.5;
     const zoomStep = 0.5;
+    const imageLoader = document.getElementById('imageLoader');
+    const importImageBtn = document.getElementById('importImageBtn');
+    const clearTracingBtn = document.getElementById('clearTracingBtn'); // If you added this button
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
 
     let pixelSize = 10; // Each pixel is 10x10
     let gridSize = 32; // 32x32 grid
@@ -27,17 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDrawingLine = false;
     let lineStartX = null;
     let lineStartY = null;
+    let tracingImage = null; // To keep track of the tracing image
 
-
-
-    // Initialize canvas
-    canvas.width = gridSize * pixelSize;
-    canvas.height = gridSize * pixelSize;
+    // Initialize canvases
+    canvas.width = tracingCanvas.width = gridSize * pixelSize;
+    canvas.height = tracingCanvas.height = gridSize * pixelSize;
     ctx.imageSmoothingEnabled = false;
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-
+    tracingCtx.globalAlpha = 0.5; // Default transparency for tracing
 
     // Function to draw or erase a pixel
     function updatePixel(x, y) {
@@ -45,26 +46,24 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.clearRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         } else {
             ctx.fillStyle = adjustBrightness(colorSelect.value, brightness.value);
-            x = Math.floor(x);
-            y = Math.floor(y);
             ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         }
         updatePreview();
     }
 
-    // Adjust color brightness (unchanged)
+    // Adjust color brightness 
     function adjustBrightness(hex, brightness) {
         const color = hexToRgb(hex);
         return `rgb(${Math.round(color.r * brightness)}, ${Math.round(color.g * brightness)}, ${Math.round(color.b * brightness)})`;
     }
-   
+
     // Change background color
     document.getElementById('bgColorSelect').addEventListener('input', function(event) {
-        document.getElementById('pixelCanvas').style.backgroundColor = event.target.value;
-        document.getElementById('previewCanvas').style.backgroundColor = event.target.value;
+        canvas.style.backgroundColor = event.target.value;
+        previewCanvas.style.backgroundColor = event.target.value;
     });
 
-    // Convert hex to RGB (unchanged)
+    // Convert hex to RGB
     function hexToRgb(hex) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
@@ -75,13 +74,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listeners for mouse interactions with both left and right click
-
-    // Prevent context menu on canvas
     canvas.addEventListener('contextmenu', function(e) {
         e.preventDefault();
     });
 
     canvas.addEventListener('mousedown', function(event) {
+        event.stopPropagation()
+        console.log('Mouse down on pixelCanvas');
+        console.log('Event target:', event.target);
         if (event.button === 0) { // Left click
             isDrawing = true;
         } else if (event.button === 2) { // Right click
@@ -89,13 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updatePixelFromEvent(event);
     });
-
+    
     canvas.addEventListener('mousemove', function(event) {
         if (isDrawing || isErasing) {
             updatePixelFromEvent(event);
         }
     });
-
+    
     canvas.addEventListener('mouseup', function(event) {
         if (event.button === 0) {
             isDrawing = false;
@@ -103,176 +103,224 @@ document.addEventListener('DOMContentLoaded', function() {
             isErasing = false;
         }
     });
-
+    
     canvas.addEventListener('mouseleave', function() {
         isDrawing = false;
         isErasing = false;
     });
+   
+    //History Undo Redo function
+    
+    const maxHistory = 50;
 
     function updatePixelFromEvent(event) {
         const rect = canvas.getBoundingClientRect();
-        const x = Math.floor((event.clientX - rect.left) / pixelSize);
-        const y = Math.floor((event.clientY - rect.top) / pixelSize);
+        const x = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
+        const y = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
         
-        // Save current state before drawing/erasing - only save once per drag start
-        if (!history[historyIndex + 1]) {
-            history = history.slice(0, historyIndex + 1);
-            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-            historyIndex++;
+        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+            if (!history[historyIndex + 1]) {
+                history = history.slice(0, historyIndex + 1);
+                if (history.length >= maxHistory) {
+                    history.shift(); // Remove the oldest state
+                }
+                history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                historyIndex++;
+            }
+            
+            updatePixel(x, y);
         }
-        
-        updatePixel(x, y);
     }
 
-    // Undo functionality (unchanged)
+    // Undo functionality 
     undoBtn.addEventListener('click', function() {
         if (historyIndex > 0) {
             historyIndex--;
             ctx.putImageData(history[historyIndex], 0, 0);
+            updatePreview();
         }
     });
 
-    // Redo functionality (unchanged)
+    // Redo functionality 
     redoBtn.addEventListener('click', function() {
         if (historyIndex < history.length - 1) {
             historyIndex++;
             ctx.putImageData(history[historyIndex], 0, 0);
+            updatePreview();
         }
     });
 
     // Default background color
     const defaultBgColor = '#ffffff'; // Set your default background color here
-    
 
-// Clear canvas with confirmation
-clearBtn.addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear the canvas and reset the background color?')) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.style.backgroundColor = defaultBgColor;
-        document.getElementById('previewCanvas').style.backgroundColor = '#ffffff';
-        document.getElementById('bgColorSelect').value = defaultBgColor;
-        history = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
-        historyIndex = 0;
-    
-    // Update preview
-    updatePreview();
-    
-    // Save to history
-    saveToHistory();
-    }
-});
-
-// Save button functionality (modified)
-saveBtn.addEventListener('click', function() {
-    const pixelCanvas = document.getElementById('pixelCanvas');
-    const bgColor = document.getElementById('bgColorSelect').value;
-    let wasGridOn = canvas.classList.contains('grid-overlay');
-    canvas.classList.remove('grid-overlay');
-
-    // Create a new canvas element
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = pixelCanvas.width;
-    tempCanvas.height = pixelCanvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
-
-    // Draw the background color
-    tempCtx.fillStyle = bgColor;
-    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-    // Draw the pixel art on top of the background
-    tempCtx.drawImage(pixelCanvas, 0, 0);
-
-    // Save the image
-    const link = document.createElement('a');
-    link.download = 'pixel_art.png';
-    link.href = tempCanvas.toDataURL();
-    link.click();
-    if (wasGridOn) {
-        canvas.classList.add('grid-overlay');
-    }
-});
-
-
-
-// Get zoom control elements
-const zoomInBtn = document.getElementById('zoomInBtn');
-const zoomOutBtn = document.getElementById('zoomOutBtn');
-const zoomLevelDisplay = document.getElementById('zoomLevel');
-
-// Apply zoom transform to canvas
-function updateZoom() {
-    canvas.style.transform = `scale(${zoomLevel})`;
-    canvas.style.transformOrigin = 'top left';
-    zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
-}
-
-// Zoom in button handler
-zoomInBtn.addEventListener('click', () => {
-    if (zoomLevel < maxZoom) {
-        zoomLevel += zoomStep;
-        updateZoom();
-    }
-    updatePreview();
-});
-
-// Zoom out button handler 
-zoomOutBtn.addEventListener('click', () => {
-    if (zoomLevel > minZoom) {
-        zoomLevel -= zoomStep;
-        updateZoom();
-    }
-    updatePreview();
-});
-
-// Update mouse position calculation for zoomed canvas
-function updatePixelFromEvent(event) {
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
-    const y = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
-    
-    if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
-        if (!history[historyIndex + 1]) {
-            history = history.slice(0, historyIndex + 1);
-            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-            historyIndex++;
+    // Clear canvas with confirmation
+    clearBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear the canvas?')) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.backgroundColor = defaultBgColor;
+            previewCanvas.style.backgroundColor = '#ffffff';
+            document.getElementById('bgColorSelect').value = defaultBgColor;
+            history = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
+            historyIndex = 0;
+            updatePreview();
         }
-        updatePixel(x, y);
+    });
+
+    // Save button functionality 
+    saveBtn.addEventListener('click', function() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        // Draw background
+        tempCtx.fillStyle = canvas.style.backgroundColor || defaultBgColor;
+        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Draw pixel art
+        tempCtx.drawImage(canvas, 0, 0);
+
+        // Create download link
+        const link = document.createElement('a');
+        link.download = 'pixel_art.png';
+        link.href = tempCanvas.toDataURL();
+        link.click();
+    });
+
+    // Zoom controls
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomLevelDisplay = document.getElementById('zoomLevel');
+
+    function updateZoom() {
+        canvas.style.transform = `scale(${zoomLevel})`;
+        tracingCanvas.style.transform = `scale(${zoomLevel})`;
+        canvas.style.transformOrigin = 'top left';
+        tracingCanvas.style.transformOrigin = 'top left';
+        zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
     }
-}
 
-// Adding function to hide overflow when zoomed in
-function updateZoom() {
-    canvas.style.transform = `scale(${zoomLevel})`;
-    canvas.style.transformOrigin = 'top left';
-    zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
-    
-    // Toggle scrollbars
-    const container = document.querySelector('.canvas-container');
-    if (zoomLevel === 1) {
-        container.classList.add('no-scroll');
-    } else {
-        container.classList.remove('no-scroll');
+    zoomInBtn.addEventListener('click', () => {
+        if (zoomLevel < maxZoom) {
+            zoomLevel += zoomStep;
+            updateZoom();
+        }
+        updatePreview();
+    });
+
+    zoomOutBtn.addEventListener('click', () => {
+        if (zoomLevel > minZoom) {
+            zoomLevel -= zoomStep;
+            updateZoom();
+        }
+        updatePreview();
+    });
+
+    // Function to adjust image transparency
+    function adjustImageTransparency(image, transparency, scaleFactor = 1) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = image.width * scaleFactor;
+        canvas.height = image.height * scaleFactor;
+        ctx.globalAlpha = transparency;
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        return canvas;
     }
-}
 
-// Grid toggle
-document.getElementById('gridToggle').addEventListener('click', function() {
-    canvas.classList.toggle('grid-overlay');
-});
+    // Handle image upload
+    imageLoader.addEventListener('change', handleImage, false);
+    function handleImage(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                let scaledWidth = tracingCanvas.width;
+                let scaledHeight = tracingCanvas.height;
+                // Scale the image to fit the canvas if it's larger or smaller
+                let scaleFactor = Math.max(scaledWidth / img.width, scaledHeight / img.height);
+                let scaledImage = adjustImageTransparency(img, 0.5, scaleFactor);
+                tracingImage = scaledImage;
+                tracingCtx.clearRect(0, 0, tracingCanvas.width, tracingCanvas.height);
+                tracingCtx.drawImage(tracingImage, 0, 0, scaledWidth, scaledHeight);
+                updatePreview();
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
 
-// Add preview window
-const previewCanvas = document.getElementById('previewCanvas');
-const previewCtx = previewCanvas.getContext('2d');
+    // Button to import image for tracing
+    importImageBtn.addEventListener('click', function() {
+        imageLoader.click();
+    });
 
-function updatePreview() {
-    // Clear preview
-    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    
-    // Draw main canvas content to preview
-    previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
-}
+    // Function to clear tracing image
+    function clearTracingImage() {
+        if (tracingImage) {
+            tracingCtx.clearRect(0, 0, tracingCanvas.width, tracingCanvas.height);
+            tracingImage = null;
+            updatePreview();
+            imageLoader.value = '';
+        }
+    }
 
-// Export as svg
+    // If you have a button to clear the tracing image
+    if (clearTracingBtn) {
+        clearTracingBtn.addEventListener('click', clearTracingImage);
+    }
+
+    // Update preview function to include both canvases
+    function updatePreview() {
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
+        if (tracingImage) {
+            previewCtx.globalAlpha = 0.5;
+            previewCtx.drawImage(tracingCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+            previewCtx.globalAlpha = 1;
+        }
+    }
+
+    // Grid toggle (assuming you have this functionality)
+    document.getElementById('gridToggle').addEventListener('click', function() {
+        canvas.classList.toggle('grid-overlay');
+    });
+
+    // Line drawing:
+    function redrawLine(event) {
+        const rect = canvas.getBoundingClientRect();
+        let endX = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
+        let endY = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (history[historyIndex]) {
+            ctx.putImageData(history[historyIndex], 0, 0);
+        }
+
+        if (event.shiftKey) { // If Shift is pressed, draw a straight line
+            if (Math.abs(lineStartX - endX) > Math.abs(lineStartY - endY)) {
+                endY = lineStartY; // Horizontal line
+            } else {
+                endX = lineStartX; // Vertical line
+            }
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(lineStartX * pixelSize + pixelSize / 2, lineStartY * pixelSize + pixelSize / 2);
+        ctx.lineTo(endX * pixelSize + pixelSize / 2, endY * pixelSize + pixelSize / 2);
+        ctx.strokeStyle = adjustBrightness(colorSelect.value, brightness.value);
+        ctx.lineWidth = pixelSize;
+        ctx.lineCap = "round";
+        ctx.stroke();
+    }
+
+    function finishLine(event) {
+        history = history.slice(0, historyIndex + 1);
+        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        historyIndex++;
+        updatePreview();
+    }
+
+    // Export as svg
 function exportAsSVG() {
     let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
@@ -319,42 +367,5 @@ function exportAsSVG() {
 
 document.getElementById('exportSvgBtn').addEventListener('click', exportAsSVG);
 
-// Line drawing:
-
-// New functions for line drawing
-function redrawLine(event) {
-    const rect = canvas.getBoundingClientRect();
-    let endX = Math.floor((event.clientX - rect.left) / (pixelSize * zoomLevel));
-    let endY = Math.floor((event.clientY - rect.top) / (pixelSize * zoomLevel));
-
-    // Clear the canvas and redraw the last state before drawing the line
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(history[historyIndex], 0, 0);
-
-    if (event.shiftKey) { // If Shift is pressed, draw a straight line
-        if (Math.abs(lineStartX - endX) > Math.abs(lineStartY - endY)) {
-            endY = lineStartY; // Horizontal line
-        } else {
-            endX = lineStartX; // Vertical line
-        }
-    }
-
-    // Draw line
-    ctx.beginPath();
-    ctx.moveTo(lineStartX * pixelSize + pixelSize / 2, lineStartY * pixelSize + pixelSize / 2);
-    ctx.lineTo(endX * pixelSize + pixelSize / 2, endY * pixelSize + pixelSize / 2);
-    ctx.strokeStyle = adjustBrightness(colorSelect.value, brightness.value);
-    ctx.lineWidth = pixelSize;
-    ctx.lineCap = "round";
-    ctx.stroke();
-}
-
-function finishLine(event) {
-    // Save the current state with the line drawn
-    history = history.slice(0, historyIndex + 1);
-    history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-    historyIndex++;
-    updatePreview();
-}
 
 });
